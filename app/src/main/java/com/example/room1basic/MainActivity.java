@@ -2,46 +2,67 @@ package com.example.room1basic;
 
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Switch;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-
-import java.util.List;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class MainActivity extends AppCompatActivity {
-    TextView textView;
     Button buttonInsert, buttonUpdate, buttonClear, buttonDelete;
     WordViewModel wordViewModel;
+    RecyclerView recyclerView;
+    Switch aSwitch;
+    MyAdapter myAdapter1, myAdapter2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+        recyclerView = findViewById(R.id.recyclerView);
+        myAdapter1 = new MyAdapter(false);
+        myAdapter2 = new MyAdapter(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(myAdapter1);
 
-
-        textView = findViewById(R.id.textView);
-
-        wordViewModel.getAllWordsLive().observe(this, words -> {
-            //当数据库中的数据发生变化时，更新UI
-            StringBuilder text = new StringBuilder();
-            for (Word word : words) {
-                text.append(word.getId()).append(":").append(word.getWord()).append(" = ").append(word.getChineseMeaning()).append("\n");
+        aSwitch = findViewById(R.id.switch1); //开关切换显示模式
+        aSwitch.setOnCheckedChangeListener((compoundButton, isChanged) -> {
+            if (isChanged) {
+                recyclerView.setAdapter(myAdapter2);
+            } else {
+                recyclerView.setAdapter(myAdapter1);
             }
-            textView.setText(text.toString());
+        });
+        wordViewModel.getAllWordsLive().observe(this, words -> {
+            myAdapter1.setAllWords(words);
+            myAdapter1.notifyDataSetChanged(); //刷新视图
+            myAdapter2.setAllWords(words);
+            myAdapter2.notifyDataSetChanged(); //刷新视图
+
         });
 
         buttonInsert = findViewById(R.id.buttonInsert);
         buttonClear = findViewById(R.id.buttonClear);
-        buttonDelete = findViewById(R.id.buttonDelete);
-        buttonUpdate = findViewById(R.id.buttonUpdate);
+//        buttonDelete = findViewById(R.id.buttonDelete);
+//        buttonUpdate = findViewById(R.id.buttonUpdate);
 
         buttonInsert.setOnClickListener(view -> {
-            Word word1 = new Word("hello", "你好");
-            Word word2 = new Word("world", "世界");
-            wordViewModel.insertWords(word1, word2); //插入两个单词
+            String[] english = {
+                    "Hello", "World", "Android", "Google",
+                    "Studio", "Project", "Database", "Recycler",
+                    "View", "string", "Value", "Integer"
+            };
+            String[] chinese = {
+                    "你好", "世界", "安卓系统", "谷歌公司",
+                    "工作室", "项目", "数据库", "回收站",
+                    "视图", "字符串", "价值", "整数类型"
+            };
+            for (int i = 0; i < english.length; i++) {
+                Word word = new Word(english[i], chinese[i]);
+                wordViewModel.insertWords(word); //插入单词
+            }
         });
 
 
@@ -49,8 +70,7 @@ public class MainActivity extends AppCompatActivity {
             wordViewModel.deleteAllWords(); //删除所有单词
         });
 
-
-        buttonDelete.setOnClickListener(view -> {
+/*        buttonDelete.setOnClickListener(view -> {
             Word word = new Word("hello", "你好");
             word.setId(101);
 //            new DeleteAsyncTask(wordDao).execute(word); //删除id为31的单词
@@ -64,8 +84,7 @@ public class MainActivity extends AppCompatActivity {
 //            wordDao.updateWords(word);
 //            new UpdateAsyncTask(wordDao).execute(word);
             wordViewModel.updateWords(word);
-        });
-
+        });*/
     }
 
 
