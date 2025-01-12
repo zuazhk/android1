@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,9 +20,12 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     // 定义一个List类型的变量allWords，用于存储所有的单词
     private List<Word> allWords = new ArrayList<>();
     private boolean userCardView;
+    private WordViewModel wordViewModel;
 
-    MyAdapter(boolean userCardView) {
+    MyAdapter(boolean userCardView, WordViewModel wordViewModel) {
         this.userCardView = userCardView;
+        this.wordViewModel = wordViewModel;
+
     }
 
     // 定义一个方法setAllWords，用于设置allWords的值
@@ -35,9 +40,9 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View itemView;
         if (userCardView) {
-            itemView = layoutInflater.inflate(R.layout.cell_card, parent, false); //加载卡片式的视图
+            itemView = layoutInflater.inflate(R.layout.cell_card_2, parent, false); //加载卡片式的视图
         } else {
-            itemView = layoutInflater.inflate(R.layout.cell_normal, parent, false); //加载列表式的视图
+            itemView = layoutInflater.inflate(R.layout.cell_normal_2, parent, false); //加载列表式的视图
         }
         return new MyViewHolder(itemView);
     }
@@ -49,6 +54,33 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         holder.textViewNumber.setText(String.valueOf(position + 1));
         holder.textViewEnglish.setText(word.getWord());
         holder.textViewChinese.setText(word.getChineseMeaning());
+
+        //aSwitchChineseInvisible 显示逻辑
+        holder.aSwitchChineseInvisible.setOnCheckedChangeListener(null); //防止重复设置监听器
+        if (word.isChineseInvisible()) {
+            holder.textViewChinese.setVisibility(View.GONE); //gone:不显示 不占位置
+//          holder.textViewChinese.setVisibility(View.INVISIBLE); //INVISIBLE:不显示 占位置
+            holder.aSwitchChineseInvisible.setChecked(true);
+            //
+        } else {
+            holder.textViewChinese.setVisibility(View.VISIBLE);//visible:显示 占位置
+            holder.aSwitchChineseInvisible.setChecked(false);
+        }
+        holder.aSwitchChineseInvisible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if (isChecked) {
+                    holder.textViewChinese.setVisibility(View.GONE);
+                    word.setChineseInvisible(true);
+                    wordViewModel.updateWords(word); //在数据库中更新
+                } else {
+                    holder.textViewChinese.setVisibility(View.VISIBLE);
+                    word.setChineseInvisible(false);
+                    wordViewModel.updateWords(word);
+                }
+            }
+        });
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,12 +100,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     static class MyViewHolder extends RecyclerView.ViewHolder {
         TextView textViewNumber, textViewEnglish, textViewChinese;
+        Switch aSwitchChineseInvisible;
 
         MyViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewNumber = itemView.findViewById(R.id.textViewNumber);
             textViewEnglish = itemView.findViewById(R.id.textViewEnglish);
             textViewChinese = itemView.findViewById(R.id.textViewChinese);
+            aSwitchChineseInvisible = itemView.findViewById(R.id.switchChineseInvisible);
         }
     }
 }

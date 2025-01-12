@@ -21,11 +21,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+        myAdapter1 = new MyAdapter(false, wordViewModel);
+        myAdapter2 = new MyAdapter(true, wordViewModel);
+
         recyclerView = findViewById(R.id.recyclerView);
-        myAdapter1 = new MyAdapter(false);
-        myAdapter2 = new MyAdapter(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(myAdapter1);
+        recyclerView.setAdapter(myAdapter1); //默认为myAdapter1
 
         aSwitch = findViewById(R.id.switch1); //开关切换显示模式
         aSwitch.setOnCheckedChangeListener((compoundButton, isChanged) -> {
@@ -35,11 +36,16 @@ public class MainActivity extends AppCompatActivity {
                 recyclerView.setAdapter(myAdapter1);
             }
         });
+
         wordViewModel.getAllWordsLive().observe(this, words -> {
+            int temp = myAdapter1.getItemCount();
             myAdapter1.setAllWords(words);
-            myAdapter1.notifyDataSetChanged(); //刷新视图
             myAdapter2.setAllWords(words);
-            myAdapter2.notifyDataSetChanged(); //刷新视图
+            if (temp != words.size()) {
+                myAdapter1.notifyDataSetChanged(); //刷新视图
+                myAdapter2.notifyDataSetChanged(); //刷新视图
+            }
+
 
         });
 

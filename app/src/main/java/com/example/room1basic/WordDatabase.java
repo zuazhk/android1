@@ -9,7 +9,7 @@ import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
 //singleton  单例模式
-@Database(entities = {Word.class}, version = 4, exportSchema = false)//当数据库结构更新时，需改动version的值
+@Database(entities = {Word.class}, version = 5, exportSchema = false)//当数据库结构更新时，需改动version的值
 public abstract class WordDatabase extends RoomDatabase {
     private static WordDatabase INSTANCE;
 
@@ -17,7 +17,8 @@ public abstract class WordDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             INSTANCE = Room.databaseBuilder(context.getApplicationContext(), WordDatabase.class, "word_database")
 //                    .fallbackToDestructiveMigration()//如果数据库版本升级，会先删除原数据库，再创建新数据库
-                    .addMigrations(MIGRATION_3_4) // 指定升级数据库的迁移策略
+//                    .addMigrations(MIGRATION_3_4) // 指定升级数据库的迁移策略
+                    .addMigrations(MIGRATION_4_5) // 指定升级数据库的迁移策略
                     .build();
         }
         return INSTANCE;
@@ -43,6 +44,13 @@ public abstract class WordDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE word");
             //重命名新表
             database.execSQL("ALTER TABLE word_temp RENAME TO word");
+        }
+    };
+
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) { //数据库版本从4升级到5 添加字段
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE word ADD COLUMN chinese_invisible INTEGER NOT NULL DEFAULT 0");
         }
     };
 
