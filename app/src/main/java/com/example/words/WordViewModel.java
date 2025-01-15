@@ -1,5 +1,7 @@
-package com.example.room1basic;
+package com.example.words;
+
 import android.app.Application;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -18,15 +20,22 @@ public class WordViewModel extends AndroidViewModel {
         return wordRepository.getAllWordsLive();
     }
 
+    LiveData<List<Word>> findWordsWithPattern(String Pattern) {
+        return wordRepository.findWordsWithPattern(Pattern);
+    }
+
     void insertWords(Word... words) {
         wordRepository.insertWords(words);
     }
+
     void updateWords(Word... words) {
         wordRepository.updateWords(words);
     }
+
     void deleteWords(Word... words) {
         wordRepository.deleteWords(words);
     }
+
     void deleteAllWords() {
         wordRepository.deleteAllWords();
     }

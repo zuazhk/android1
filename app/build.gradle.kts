@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.room1basic"
+    namespace = "com.example.words"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.room1basic"
+        applicationId = "com.example.words"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -32,6 +32,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")

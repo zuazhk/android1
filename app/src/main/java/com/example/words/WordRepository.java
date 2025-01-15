@@ -1,4 +1,4 @@
-package com.example.room1basic;
+package com.example.words;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -36,6 +36,10 @@ class WordRepository {
 
     LiveData<List<Word>> getAllWordsLive() {
         return allWordsLive;
+    }
+
+    LiveData<List<Word>> findWordsWithPattern(String query) {
+        return wordDao.findWordsWithPattern("%" + query + "%");//模糊查询
     }
 
 

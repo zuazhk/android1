@@ -1,4 +1,4 @@
-package com.example.room1basic;
+package com.example.words;
 
 import android.content.Context;
 

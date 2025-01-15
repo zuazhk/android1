@@ -1,4 +1,4 @@
-package com.example.room1basic;
+package com.example.words;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -44,52 +44,56 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         } else {
             itemView = layoutInflater.inflate(R.layout.cell_normal_2, parent, false); //加载列表式的视图
         }
-        return new MyViewHolder(itemView);
-    }
+//        return new MyViewHolder(itemView);
 
-    // 重写onBindViewHolder方法，用于绑定ViewHolder
-    @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-        Word word = allWords.get(position);
-        holder.textViewNumber.setText(String.valueOf(position + 1));
-        holder.textViewEnglish.setText(word.getWord());
-        holder.textViewChinese.setText(word.getChineseMeaning());
-
-        //aSwitchChineseInvisible 显示逻辑
-        holder.aSwitchChineseInvisible.setOnCheckedChangeListener(null); //防止重复设置监听器
-        if (word.isChineseInvisible()) {
-            holder.textViewChinese.setVisibility(View.GONE); //gone:不显示 不占位置
-//          holder.textViewChinese.setVisibility(View.INVISIBLE); //INVISIBLE:不显示 占位置
-            holder.aSwitchChineseInvisible.setChecked(true);
-            //
-        } else {
-            holder.textViewChinese.setVisibility(View.VISIBLE);//visible:显示 占位置
-            holder.aSwitchChineseInvisible.setChecked(false);
-        }
-        holder.aSwitchChineseInvisible.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if (isChecked) {
-                    holder.textViewChinese.setVisibility(View.GONE);
-                    word.setChineseInvisible(true);
-                    wordViewModel.updateWords(word); //在数据库中更新
-                } else {
-                    holder.textViewChinese.setVisibility(View.VISIBLE);
-                    word.setChineseInvisible(false);
-                    wordViewModel.updateWords(word);
-                }
-            }
-        });
-
+        //  放在这里节省资源 ，因为ViewHolder是复用的
+        final MyViewHolder holder = new MyViewHolder(itemView);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 String wd = holder.textViewEnglish.getText().toString();
                 Uri uri = Uri.parse("https://dict.youdao.com/result?word=" + wd + "&lang=en");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
 //                holder.itemView.getContext().startActivity(intent); //启动浏览器
             }
         });
+        holder.aSwitchChineseInvisible.setOnCheckedChangeListener((compoundButton, isChecked) -> {
+            Word word = (Word) holder.itemView.getTag(R.id.word_for_view_holder);//获取当前单词
+            if (isChecked) {
+                holder.textViewChinese.setVisibility(View.GONE);
+                word.setChineseInvisible(true);
+                wordViewModel.updateWords(word); //在数据库中更新
+            } else {
+                holder.textViewChinese.setVisibility(View.VISIBLE);
+                word.setChineseInvisible(false);
+                wordViewModel.updateWords(word);
+            }
+        });
+        return holder;
+
+
+    }
+
+    // 重写onBindViewHolder方法，用于绑定ViewHolder
+    @Override
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        final Word word = allWords.get(position);
+        holder.itemView.setTag(R.id.word_for_view_holder,word); //将当前单词绑定到ViewHolder上
+
+        holder.textViewNumber.setText(String.valueOf(position + 1));
+        holder.textViewEnglish.setText(word.getWord());
+        holder.textViewChinese.setText(word.getChineseMeaning());
+
+        //aSwitchChineseInvisible 显示逻辑
+        if (word.isChineseInvisible()) {
+            holder.textViewChinese.setVisibility(View.GONE); //gone:不显示 不占位置 INVISIBLE:不显示 占位置
+            holder.aSwitchChineseInvisible.setChecked(true);
+            //
+        } else {
+            holder.textViewChinese.setVisibility(View.VISIBLE);//visible:显示 占位置
+            holder.aSwitchChineseInvisible.setChecked(false);
+        }
+
     }
 
 
